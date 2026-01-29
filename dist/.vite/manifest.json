@@ -1,0 +1,93 @@
+{
+  "../@crx/manifest": {
+    "file": "assets/crx-manifest.js-DiCNRQ0r.js",
+    "name": "crx-manifest.js",
+    "src": "../@crx/manifest",
+    "isEntry": true
+  },
+  "_index-DZv3xrv-.js": {
+    "file": "assets/index-DZv3xrv-.js",
+    "name": "index"
+  },
+  "_index-GBB3cjU1.js": {
+    "file": "assets/index-GBB3cjU1.js",
+    "name": "index",
+    "imports": [
+      "_index-DZv3xrv-.js"
+    ]
+  },
+  "_index.tsx-loader-D8dAvn55.js": {
+    "file": "assets/index.tsx-loader-D8dAvn55.js",
+    "src": "_index.tsx-loader-D8dAvn55.js"
+  },
+  "_modulepreload-polyfill-B5Qt9EMX.js": {
+    "file": "assets/modulepreload-polyfill-B5Qt9EMX.js",
+    "name": "modulepreload-polyfill"
+  },
+  "_resume-pdf-generator-mTo4Wt4i.js": {
+    "file": "assets/resume-pdf-generator-mTo4Wt4i.js",
+    "name": "resume-pdf-generator",
+    "isDynamicEntry": true,
+    "imports": [
+      "_index-DZv3xrv-.js"
+    ]
+  },
+  "src/background/index.ts": {
+    "file": "assets/index.ts-Kdm0pKKY.js",
+    "name": "index.ts",
+    "src": "src/background/index.ts",
+    "isEntry": true
+  },
+  "src/content/cover-letter-pdf-generator.tsx": {
+    "file": "assets/cover-letter-pdf-generator-B5XUP9TX.js",
+    "name": "cover-letter-pdf-generator",
+    "src": "src/content/cover-letter-pdf-generator.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_index-DZv3xrv-.js",
+      "_resume-pdf-generator-mTo4Wt4i.js"
+    ]
+  },
+  "src/content/index.tsx": {
+    "file": "assets/index.tsx-uFSBmzmB.js",
+    "name": "index.tsx",
+    "src": "src/content/index.tsx",
+    "isEntry": true,
+    "imports": [
+      "_index-DZv3xrv-.js",
+      "_index-GBB3cjU1.js",
+      "_resume-pdf-generator-mTo4Wt4i.js"
+    ],
+    "dynamicImports": [
+      "_resume-pdf-generator-mTo4Wt4i.js"
+    ]
+  },
+  "src/offscreen/pdf.html": {
+    "file": "assets/offscreen-C7-livDw.js",
+    "name": "offscreen",
+    "src": "src/offscreen/pdf.html",
+    "isEntry": true,
+    "imports": [
+      "_modulepreload-polyfill-B5Qt9EMX.js",
+      "_resume-pdf-generator-mTo4Wt4i.js",
+      "_index-DZv3xrv-.js"
+    ],
+    "dynamicImports": [
+      "src/content/cover-letter-pdf-generator.tsx"
+    ]
+  },
+  "src/sidepanel/index.html": {
+    "file": "assets/index.html-BUFsXM6h.js",
+    "name": "index.html",
+    "src": "src/sidepanel/index.html",
+    "isEntry": true,
+    "imports": [
+      "_modulepreload-polyfill-B5Qt9EMX.js",
+      "_index-DZv3xrv-.js",
+      "_index-GBB3cjU1.js"
+    ],
+    "css": [
+      "assets/index-DVbEeW2I.css"
+    ]
+  }
+}

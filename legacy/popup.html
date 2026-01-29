@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       min-width: 320px;
@@ -21,6 +22,8 @@
 
     .container {
       padding: 24px;
+      padding-bottom: 80px;
+      /* Space for FAB */
       width: 100%;
       max-width: 800px;
       margin: 0 auto;
@@ -237,6 +240,7 @@
       0% {
         transform: translateX(-100%);
       }
+
       100% {
         transform: translateX(350%);
       }
@@ -251,10 +255,15 @@
 
     /* Loading Animation */
     @keyframes shimmer {
-      0% { background-position: -1000px 0; }
-      100% { background-position: 1000px 0; }
+      0% {
+        background-position: -1000px 0;
+      }
+
+      100% {
+        background-position: 1000px 0;
+      }
     }
-    
+
     .loading {
       background: linear-gradient(90deg, #0a66c2 0%, #004182 50%, #0a66c2 100%);
       background-size: 1000px 100%;
@@ -262,7 +271,9 @@
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .spinning {
@@ -411,6 +422,7 @@
         opacity: 0;
         transform: translateY(-10px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -564,37 +576,39 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <!-- Navigation Menu -->
-    <nav class="nav-menu" style="background: white; margin: -24px -24px 24px -24px; padding: 12px 24px; border-bottom: 1px solid #e2e8f0; display: flex; gap: 8px;">
-      <a href="#token" class="nav-link" id="tokenNav">
-        <svg class="nav-icon" style="width: 16px; height: 16px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    <nav class="nav-menu"
+      style="background: white; margin: -24px -24px 24px -24px; padding: 12px 24px; border-bottom: 1px solid #e2e8f0; display: flex; gap: 8px;">
+      <a href="#jobapp" class="nav-link active" id="jobappNav">
+        <svg class="nav-icon" style="width: 16px; height: 16px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
         </svg>
-        <span>Auth</span>
+        <span>Job App</span>
       </a>
       <a href="#extract" class="nav-link" id="extractNav">
-        <svg class="nav-icon" style="width: 16px; height: 16px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
-          <rect width="4" height="12" x="2" y="9"/>
-          <circle cx="4" cy="4" r="2"/>
+        <svg class="nav-icon" style="width: 16px; height: 16px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+          <rect width="4" height="12" x="2" y="9" />
+          <circle cx="4" cy="4" r="2" />
         </svg>
         <span>Extract</span>
       </a>
-      <a href="#search" class="nav-link active" id="searchNav">
-        <svg class="nav-icon" style="width: 16px; height: 16px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      <a href="#token" class="nav-link" id="tokenNav">
+        <svg class="nav-icon" style="width: 16px; height: 16px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
-        <span>Search</span>
-      </a>
-      <a href="#jobapp" class="nav-link" id="jobappNav">
-        <svg class="nav-icon" style="width: 16px; height: 16px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect width="20" height="14" x="2" y="7" rx="2" ry="2"/>
-          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-        </svg>
-        <span>Job App</span>
+        <span>Auth</span>
       </a>
     </nav>
 
@@ -603,14 +617,15 @@
       <!-- Header -->
       <div class="header">
         <div class="icon-wrapper">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
         </div>
         <div class="header-text">
           <h1>Authentication</h1>
-          <p>Checking your CareerForge token</p>
+          <p>Checking your bhaikaamdo token</p>
         </div>
       </div>
 
@@ -618,7 +633,8 @@
       <div class="info-card">
         <div class="info-content">
           <div class="info-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M12 16v-4"></path>
               <path d="M12 8h.01"></path>
@@ -626,7 +642,9 @@
           </div>
           <div class="info-text">
             <h3>Authentication Required</h3>
-            <p>Please log in to <a href="https://careerforge.datapsx.com" target="_blank" style="color: #2563eb;">careerforge.datapsx.com</a> first. Your authentication token will be automatically detected.</p>
+            <p>Please log in to <a href="https://bhaikaamdo.com" target="_blank"
+                style="color: #2563eb;">bhaikaamdo.com</a> first. Your authentication token will be
+              automatically detected.</p>
           </div>
         </div>
       </div>
@@ -635,27 +653,22 @@
       <div class="info-card" style="margin-bottom:12px;">
         <div class="info-content" style="flex-direction:column;align-items:stretch;gap:8px;">
           <div class="info-text">
-            <label for="tokenInput" class="label">CareerForge Token</label>
+            <label for="tokenInput" class="label">Bhaikaamdo Token</label>
           </div>
-          <input id="tokenInput" type="text" class="input" placeholder="Paste your CareerForge token here" disabled>
+          <input id="tokenInput" type="text" class="input" placeholder="Paste your Bhaikaamdo token here" disabled>
         </div>
       </div>
 
       <!-- Refresh Button -->
       <button id="refreshTokenBtn" class="btn">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
         </svg>
         <span>Refresh Token</span>
       </button>
 
-      <!-- Submit Token Button -->
-      <button id="submitTokenBtn" class="btn" style="margin-top:10px;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 5v14M19 12H5"></path>
-        </svg>
-        <span>Submit Token</span>
-      </button>
+
 
       <!-- Status Message -->
       <div id="tokenStatus" class="status">
@@ -667,10 +680,13 @@
 
       <!-- Footer -->
       <div class="footer">
-        <span>CareerBack v1.0</span>
+        <span>Bhaikaamdo v1.0</span>
         <div class="footer-badge">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z">
+            </path>
           </svg>
           <span>Secure</span>
         </div>
@@ -682,7 +698,8 @@
       <!-- Header -->
       <div class="header">
         <div class="icon-wrapper">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
             <rect width="4" height="12" x="2" y="9"></rect>
             <circle cx="4" cy="4" r="2"></circle>
@@ -698,7 +715,8 @@
       <div class="info-card">
         <div class="info-content">
           <div class="info-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M12 16v-4"></path>
               <path d="M12 8h.01"></path>
@@ -712,13 +730,26 @@
       </div>
 
       <!-- Extract Button -->
-      <button id="extractBtn" class="btn">
-        <svg id="btnIcon" class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7 10 12 15 17 10"></polyline>
-          <line x1="12" x2="12" y1="15" y2="3"></line>
+      <!-- Modified to be disabled by default, enabled only on valid LinkedIn pages with specific keywords -->
+      <button id="extractBtn" class="btn" title="Download LinkedIn Profile" disabled>
+        <svg id="btnIcon" class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+          fill="currentColor">
+          <path
+            d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
         </svg>
-        <span id="btnText">Extract & Save Profile</span>
+        <span id="btnText">Download LinkedIn Profile</span>
+      </button>
+
+      <!-- Global Login Button (Hidden by default) -->
+      <button id="globalLoginBtn" class="btn"
+        style="display:none; background: linear-gradient(135deg, #0a66c2 0%, #004182 100%); margin-top: 10px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+          <polyline points="10 17 15 12 10 7" />
+          <line x1="15" y1="12" x2="3" y2="12" />
+        </svg>
+        <span>Login to CareerForge</span>
       </button>
 
       <!-- Change Token Link -->
@@ -735,110 +766,41 @@
       <!-- Per-page extraction statuses -->
       <div id="pageStatus" class="info-card" style="margin-top:12px; display:none;">
         <h3 style="font-size:14px;margin-bottom:8px;">Extraction Progress</h3>
-        <ul id="pageStatusList" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px;"></ul>
+        <ul id="pageStatusList" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px;">
+        </ul>
       </div>
 
       <!-- Footer -->
       <div class="footer">
-        <span>CareerBack v1.0</span>
+        <span>Bhaikaamdo v1.0</span>
         <div class="footer-badge">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z">
+            </path>
           </svg>
           <span>Secure</span>
         </div>
       </div>
     </div>
 
-    <!-- Search Page -->
-    <div id="searchPage" class="page-view active">
-      <!-- Header -->
-      <div class="header">
-        <div class="icon-wrapper">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-          </svg>
-        </div>
-        <div class="header-text">
-          <h1>Job Search</h1>
-          <p>Search across multiple job sites</p>
-        </div>
-      </div>
-
-      <!-- Search Form -->
-      <div class="info-card">
-        <div class="form-content">
-          <div class="form-group">
-            <label class="label" for="jobTitle">Job Title</label>
-            <input type="text" id="jobTitle" class="input" placeholder="e.g. Software Engineer">
-          </div>
-          <div class="form-group">
-            <label class="label" for="location">Location</label>
-            <input type="text" id="location" class="input" placeholder="e.g. Karachi, Pakistan">
-          </div>
-        </div>
-      </div>
-
-      <!-- Job Sites Selection -->
-      <div class="info-card">
-        <label class="label">Job Sites</label>
-        <div class="sites-grid">
-          <div class="checkbox-container">
-            <input type="checkbox" id="rozee" name="sites" value="rozee.pk" class="checkbox">
-            <label for="rozee" class="checkbox-label">Rozee.pk</label>
-          </div>
-          <div class="checkbox-container">
-            <input type="checkbox" id="mustakbil" name="sites" value="mustakbil.com" class="checkbox">
-            <label for="mustakbil" class="checkbox-label">Mustakbil.com</label>
-          </div>
-          <div class="checkbox-container">
-            <input type="checkbox" id="indeed" name="sites" value="pk.indeed.com" class="checkbox">
-            <label for="indeed" class="checkbox-label">indeed.com</label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Search Button -->
-      <button id="searchBtn" class="btn">
-        <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-        <span>Search Jobs</span>
-      </button>
-
-      <!-- Status Message -->
-      <div id="searchStatus" class="status">
-        <div class="status-content">
-          <div id="searchStatusIcon" class="status-icon"></div>
-          <div id="searchStatusText" class="status-text"></div>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="footer">
-        <span>CareerBack v1.0</span>
-        <div class="footer-badge">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
-          </svg>
-          <span>Secure</span>
-        </div>
-      </div>
-    </div>
+    <!-- Search Page Removed -->
 
     <!-- Job Application Page -->
-    <div id="jobappPage" class="page-view">
+    <div id="jobappPage" class="page-view active">
       <!-- Header -->
       <div class="header">
         <div class="icon-wrapper">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect width="20" height="14" x="2" y="7" rx="2" ry="2"/>
-            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
           </svg>
         </div>
         <div class="header-text">
           <h1>Job Application</h1>
-          <p>Save job posting to CareerForge</p>
+          <p>Save job posting to bhaikaamdo</p>
         </div>
       </div>
 
@@ -846,7 +808,8 @@
       <div class="info-card">
         <div class="info-content">
           <div class="info-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M12 16v-4"></path>
               <path d="M12 8h.01"></path>
@@ -854,7 +817,8 @@
           </div>
           <div class="info-text">
             <h3>How to use</h3>
-            <p>Navigate to any job posting page and click the button below to save the job details to your CareerForge account.</p>
+            <p>Navigate to any job posting page and click the button below to save the job details to your bhaikaamdo
+              account.</p>
           </div>
         </div>
       </div>
@@ -871,12 +835,13 @@
 
       <!-- Save Button -->
       <button id="saveJobLinkBtn" class="btn">
-        <svg id="saveJobIcon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-          <polyline points="17 21 17 13 7 13 7 21"/>
-          <polyline points="7 3 7 8 15 8"/>
+        <svg id="saveJobIcon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+          <polyline points="17 21 17 13 7 13 7 21" />
+          <polyline points="7 3 7 8 15 8" />
         </svg>
-        <span id="saveJobText">Save Link to CareerForge</span>
+        <span id="saveJobText">Save Link to bhaikaamdo</span>
       </button>
 
       <!-- Progress Bar -->
@@ -897,15 +862,18 @@
 
       <!-- Action Buttons (shown after successful save) -->
       <div id="jobappActions" class="action-buttons">
-        <button id="checkCompatibilityBtn" class="btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); margin-bottom: 8px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button id="checkCompatibilityBtn" class="btn"
+          style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); margin-bottom: 8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
           <span>Check Job Compatibility</span>
         </button>
         <button id="createCVBtn" class="btn" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" x2="8" y1="13" y2="13"></line>
@@ -918,10 +886,13 @@
 
       <!-- Footer -->
       <div class="footer">
-        <span>CareerBack v1.0</span>
+        <span>Bhaikaamdo v1.0</span>
         <div class="footer-badge">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z">
+            </path>
           </svg>
           <span>Secure</span>
         </div>
@@ -930,6 +901,10 @@
 
   </div>
 
+  <!-- Bottom FAB -->
+
+
   <script src="popup.js"></script>
 </body>
+
 </html>

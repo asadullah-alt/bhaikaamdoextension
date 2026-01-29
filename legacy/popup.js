@@ -1,7 +1,6 @@
 // Global variable to store validated token
 let validatedToken = null;
 let lastSavedJobUrl = null;
-// Freeze tracking of tab/url changes while a save to CareerForge is in progress
 let freezeUrlUpdates = false;
 let freezeTimeoutId = null;
 const FREEZE_TIMEOUT_MS = 60000; // 60s fallback
@@ -28,14 +27,14 @@ function setFreezeUntilSaveComplete(enable) {
 document.addEventListener('DOMContentLoaded', async () => {
   // Setup navigation
   setupNavigation();
-  
-  // Check URL hash for initial navigation - default to search
-  const hash = window.location.hash.slice(1) || 'search';
+
+  // Check URL hash for initial navigation - default to jobapp
+  const hash = window.location.hash.slice(1) || 'jobapp';
   navigateTo(hash);
-  
+
   // Try to get cookie and validate it
   await checkAndValidateCookie();
-  
+
   // Setup job application page
   setupJobApplicationPage();
 });
@@ -47,40 +46,43 @@ async function checkAndValidateCookie() {
       url: 'https://bhaikaamdo.com',
       name: 'cf_auth'
     });
-    
+
     if (cookie && cookie.value) {
       const tokenInput = document.getElementById('tokenInput');
       if (tokenInput) {
         tokenInput.value = cookie.value;
       }
-      
+
       // Show loading state on token page
       showTokenStatus('Validating token...', 'info');
-      
+
       // Validate the token
       const validationResult = await validateToken(cookie.value);
-      
+
       if (validationResult.success && validationResult.valid) {
         validatedToken = cookie.value;
         // Store token in chrome.storage.local
-        await chrome.storage.local.set({ 
+        await chrome.storage.local.set({
           careerforgeToken: cookie.value,
-          username: validationResult.username 
+          username: validationResult.username
         });
-        
+
         // Show success
         showTokenStatus('Token validated successfully!', 'success');
+        updateAuthUI(true);
       } else {
         // Token is invalid
-        showTokenStatus('Invalid or expired token. Please log in to CareerForge.', 'error');
+        showTokenStatus('Invalid or expired token. Please log in to bhaikaamdo.', 'error');
         validatedToken = null;
         await chrome.storage.local.remove(['careerforgeToken', 'username']);
+        updateAuthUI(false);
       }
     } else {
       // No cookie found
-      showTokenStatus('No authentication token found. Please log in to CareerForge first.', 'error');
+      showTokenStatus('No authentication token found. Please log in to bhaikaamdo first.', 'error');
       validatedToken = null;
       await chrome.storage.local.remove(['careerforgeToken', 'username']);
+      updateAuthUI(false);
     }
   } catch (error) {
     console.error('Error checking cookie:', error);
@@ -96,7 +98,7 @@ async function setupJobApplicationPage() {
     const jobLinkInput = document.getElementById('jobLinkInput');
     if (tab && tab.url && jobLinkInput) {
       jobLinkInput.value = tab.url;
-      
+
       // Check if URL changed from last saved job
       if (lastSavedJobUrl && lastSavedJobUrl !== tab.url) {
         hideJobappActionsAndStatus();
@@ -105,21 +107,21 @@ async function setupJobApplicationPage() {
   } catch (error) {
     console.error('Error getting current tab:', error);
   }
-  
+
   // Setup save button handler
   const saveJobLinkBtn = document.getElementById('saveJobLinkBtn');
   if (saveJobLinkBtn) {
     saveJobLinkBtn.addEventListener('click', handleSaveJobLink);
   }
-  
+
   // Setup action button handlers
   const checkCompatibilityBtn = document.getElementById('checkCompatibilityBtn');
   const createCVBtn = document.getElementById('createCVBtn');
-  
+
   if (checkCompatibilityBtn) {
     checkCompatibilityBtn.addEventListener('click', handleCheckCompatibility);
   }
-  
+
   if (createCVBtn) {
     createCVBtn.addEventListener('click', handleCreateCV);
   }
@@ -129,15 +131,15 @@ async function setupJobApplicationPage() {
 function hideJobappActionsAndStatus() {
   const actionsContainer = document.getElementById('jobappActions');
   const statusContainer = document.getElementById('jobappStatus');
-  
+
   if (actionsContainer) {
     actionsContainer.classList.remove('show');
   }
-  
+
   if (statusContainer) {
     statusContainer.classList.remove('show');
   }
-  
+
   lastSavedJobUrl = null;
 }
 
@@ -167,40 +169,40 @@ async function handleSaveJobLink() {
       showJobappStatus('Please authenticate first. Go to Auth tab.', 'error');
       return;
     }
-    
+
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab || !tab.id) {
       showJobappStatus('Unable to locate active tab.', 'error');
       return;
     }
-    
+
     // Disable button and show progress
     const saveBtn = document.getElementById('saveJobLinkBtn');
     const saveIcon = document.getElementById('saveJobIcon');
     const saveText = document.getElementById('saveJobText');
     const progressContainer = document.getElementById('jobappProgress');
-    
+
     saveBtn.disabled = true;
     saveText.textContent = 'Saving...';
     saveIcon.classList.add('spinning');
     saveIcon.innerHTML = '<path d="M21 12a9 9 0 1 1-6.219-8.56"></path>';
-    
+
     // Show progress bar
     progressContainer.classList.add('show');
-    
+
     // Hide any previous status and action buttons
     document.getElementById('jobappStatus').classList.remove('show');
     document.getElementById('jobappActions').classList.remove('show');
-    
+
     const payload = { action: 'fetchJobApplication', token: validatedToken };
-    
+
     const send = () => new Promise((resolve) => {
       chrome.tabs.sendMessage(tab.id, payload, (response) => {
         const lastError = chrome.runtime.lastError ? { message: chrome.runtime.lastError.message } : null;
         resolve({ response, lastError });
       });
     });
-    
+
     let { response, lastError } = await send();
     if (lastError && lastError.message && lastError.message.includes('Could not establish connection')) {
       // try injecting content script then retry
@@ -216,32 +218,32 @@ async function handleSaveJobLink() {
         showJobappStatus('Failed to inject content script: ' + e.message, 'error');
         return;
       }
-      
+
       const retry = await send();
       response = retry.response;
       lastError = retry.lastError;
     }
-    
+
     // Hide progress bar
     progressContainer.classList.remove('show');
     resetSaveButton();
-    
+
     if (lastError) {
       showJobappStatus('Error saving job application: ' + (lastError.message || 'unknown'), 'error');
       return;
     }
-    
+
     if (!response) {
       showJobappStatus('No response from page when saving job application.', 'error');
       return;
     }
-    
+
     if (response.success) {
       // Store the current URL as the last saved job
       lastSavedJobUrl = tab.url;
-      
-      showJobappStatus('Job application saved successfully to CareerForge!', 'success');
-      
+
+      showJobappStatus('Job application saved successfully to bhaikaamdo!', 'success');
+
       // Show action buttons
       const actionsContainer = document.getElementById('jobappActions');
       if (actionsContainer) {
@@ -250,7 +252,7 @@ async function handleSaveJobLink() {
     } else {
       showJobappStatus(response.message || 'Failed to save job application.', 'error');
     }
-    
+
   } catch (err) {
     // Hide progress bar and reset button on error
     document.getElementById('jobappProgress').classList.remove('show');
@@ -267,9 +269,9 @@ function resetSaveButton() {
   const saveBtn = document.getElementById('saveJobLinkBtn');
   const saveIcon = document.getElementById('saveJobIcon');
   const saveText = document.getElementById('saveJobText');
-  
+
   saveBtn.disabled = false;
-  saveText.textContent = 'Save Link to CareerForge';
+  saveText.textContent = 'Save Link to bhaikaamdo';
   saveIcon.classList.remove('spinning');
   saveIcon.innerHTML = `
     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
@@ -282,81 +284,12 @@ function resetSaveButton() {
 chrome.runtime.onMessage.addListener((msg) => {
   if (!msg || !msg.type) return;
   if (msg.type === 'pageStatus') {
-    updatePageStatus(msg.page, msg.status, msg.statusType || 'info',msg.data||null);
+    updatePageStatus(msg.page, msg.status, msg.statusType || 'info', msg.data || null);
   }
 });
 
-// Initialize search form functionality
-const searchBtn = document.getElementById('searchBtn');
 
-if (searchBtn) {
-  searchBtn.addEventListener('click', async () => {
-    // Get form values
-    const jobTitle = document.getElementById('jobTitle')?.value?.trim() || '';
-    const location = document.getElementById('location')?.value?.trim() || '';
-    
-    // Get selected job sites
-    const selectedSites = Array.from(document.querySelectorAll('input[name="sites"]:checked'))
-      .map(checkbox => checkbox.value);
-    
-    if (!jobTitle) {
-      showSearchStatus('Please enter a job title.', 'error');
-      return;
-    }
-    
-    if (selectedSites.length === 0) {
-      showSearchStatus('Please select at least one job site.', 'error');
-      return;
-    }
-    
-    // Show searching status
-    showSearchStatus('Opening job searches...', 'info');
-    searchBtn.disabled = true;
-    
-    try {
-      // Open each selected job site in a new tab
-      for (const site of selectedSites) {
-        let searchUrl;
-        const encodedTitle = encodeURIComponent(jobTitle);
-        const encodedLocation = encodeURIComponent(location);
-        
-        switch (site) {
-          case 'rozee.pk':
-            searchUrl = `https://www.rozee.pk/job/jsearch/q/${encodedTitle}/stype/title`;
-            if (location) {
-              searchUrl += `/fc/${encodedLocation}`;
-            }
-            break;
-            
-          case 'mustakbil.com':
-            searchUrl = `https://www.mustakbil.com/jobs/search?keywords=${encodedTitle}`;
-            if (location) {
-              searchUrl += `&city=${encodedLocation}`;
-            }
-            break;
-            
-          case 'pk.indeed.com':
-            const indeedTitle = jobTitle.replace(/\s+/g, '+');
-            searchUrl = `https://pk.indeed.com/jobs?q=${indeedTitle}`;
-            if (location) {
-              searchUrl += `&l=${encodedLocation}`;
-            }
-            break;
-        }
-        
-        if (searchUrl) {
-          await chrome.tabs.create({ url: searchUrl });
-        }
-      }
-      
-      showSearchStatus(`Opened ${selectedSites.length} job search page${selectedSites.length > 1 ? 's' : ''} successfully!`, 'success');
-    } catch (error) {
-      showSearchStatus('Error opening job searches: ' + error.message, 'error');
-    } finally {
-      searchBtn.disabled = false;
-    }
-  });
-}
+// Search functionality removed
 
 // Refresh token button
 document.getElementById('refreshTokenBtn').addEventListener('click', async () => {
@@ -364,32 +297,8 @@ document.getElementById('refreshTokenBtn').addEventListener('click', async () =>
   await checkAndValidateCookie();
 });
 
-// Submit token button
-const submitBtnEl = document.getElementById('submitTokenBtn');
-if (submitBtnEl) {
-  submitBtnEl.addEventListener('click', async () => {
-    const tokenInput = document.getElementById('tokenInput');
-    if (!tokenInput) return;
-    const token = tokenInput.value && tokenInput.value.trim();
-    if (!token) {
-      showTokenStatus('Please paste a token before submitting.', 'error');
-      return;
-    }
+// Submit token button functionality removed
 
-    showTokenStatus('Validating token...', 'info');
-    const res = await validateToken(token);
-    if (res.success && res.valid) {
-      validatedToken = token;
-      await chrome.storage.local.set({ careerforgeToken: token, username: res.username });
-      showTokenStatus('Token validated successfully!', 'success');
-      setTimeout(() => showPage('search'), 600);
-    } else {
-      validatedToken = null;
-      await chrome.storage.local.remove(['careerforgeToken','username']);
-      showTokenStatus('Token is invalid. Please check and try again.', 'error');
-    }
-  });
-}
 
 // Change token button
 document.getElementById('changeTokenBtn').addEventListener('click', async () => {
@@ -400,25 +309,35 @@ document.getElementById('changeTokenBtn').addEventListener('click', async () => 
   await checkAndValidateCookie();
 });
 
+
+
+// Login Button
+const globalLoginBtn = document.getElementById('globalLoginBtn');
+if (globalLoginBtn) {
+  globalLoginBtn.addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://bhaikaamdo.com/signin' });
+  });
+}
+
 // Extract profile button
 document.getElementById('extractBtn').addEventListener('click', async () => {
   const btn = document.getElementById('extractBtn');
   const btnText = document.getElementById('btnText');
   const btnIcon = document.getElementById('btnIcon');
   const status = document.getElementById('status');
-  
+
   btn.disabled = true;
   btn.classList.add('loading');
   btnText.textContent = 'Extracting...';
-  
+
   btnIcon.classList.add('spinning');
   btnIcon.innerHTML = '<path d="M21 12a9 9 0 1 1-6.219-8.56"></path>';
-  
+
   status.classList.remove('show');
-  
+
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    
+
     if (!tab.url.includes('linkedin.com/in/')) {
       showStatus(
         'Please navigate to your LinkedIn profile page first.',
@@ -432,8 +351,8 @@ document.getElementById('extractBtn').addEventListener('click', async () => {
       resetButton();
       return;
     }
-    
-    const pages = ['experience','education','certifications','projects','skills'];
+
+    const pages = ['experience', 'education', 'certifications', 'projects', 'skills'];
     initPageStatus(pages);
     document.getElementById('pageStatus').style.display = 'block';
 
@@ -443,7 +362,7 @@ document.getElementById('extractBtn').addEventListener('click', async () => {
         resetButton();
         return;
       }
-     
+
       const sendMessageOnce = () => new Promise((resolve) => {
         chrome.tabs.sendMessage(tab.id, { action: 'extractProfile', token: validatedToken }, (response) => {
           const lastError = chrome.runtime.lastError ? { message: chrome.runtime.lastError.message } : null;
@@ -516,7 +435,7 @@ document.getElementById('extractBtn').addEventListener('click', async () => {
 
       resetButton();
     })();
-    
+
   } catch (error) {
     showStatus(
       'An error occurred: ' + error.message,
@@ -545,7 +464,7 @@ async function validateToken(token) {
     });
 
     const data = await response.json();
-    
+
     if (response.ok && data.success && data.valid) {
       return {
         success: true,
@@ -577,7 +496,7 @@ function showTokenStatus(message, type) {
   const status = document.getElementById('tokenStatus');
   const statusText = document.getElementById('tokenStatusText');
   const statusIcon = document.getElementById('tokenStatusIcon');
-  
+
   let iconSvg;
   if (type === 'success') {
     iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
@@ -586,10 +505,10 @@ function showTokenStatus(message, type) {
   } else {
     iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" x2="9" y1="9" y2="15"></line><line x1="9" x2="15" y1="9" y2="15"></line></svg>`;
   }
-  
+
   statusText.textContent = message;
   statusIcon.innerHTML = iconSvg;
-  
+
   status.classList.remove('success', 'error', 'info');
   status.classList.add(type);
   status.classList.add('show');
@@ -599,7 +518,7 @@ function showJobappStatus(message, type) {
   const status = document.getElementById('jobappStatus');
   const statusText = document.getElementById('jobappStatusText');
   const statusIcon = document.getElementById('jobappStatusIcon');
-  
+
   let iconSvg;
   if (type === 'success') {
     iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
@@ -608,10 +527,10 @@ function showJobappStatus(message, type) {
   } else {
     iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" x2="9" y1="9" y2="15"></line><line x1="9" x2="15" y1="9" y2="15"></line></svg>`;
   }
-  
+
   statusText.textContent = message;
   statusIcon.innerHTML = iconSvg;
-  
+
   status.classList.remove('success', 'error', 'info');
   status.classList.add(type);
   status.classList.add('show');
@@ -621,11 +540,11 @@ function resetButton() {
   const btn = document.getElementById('extractBtn');
   const btnText = document.getElementById('btnText');
   const btnIcon = document.getElementById('btnIcon');
-  
+
   btn.disabled = false;
   btn.classList.remove('loading');
   btnText.textContent = 'Extract & Save Profile';
-  
+
   btnIcon.classList.remove('spinning');
   btnIcon.innerHTML = `
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -638,10 +557,10 @@ function showStatus(message, type, iconSvg) {
   const status = document.getElementById('status');
   const statusText = document.getElementById('statusText');
   const statusIcon = document.getElementById('statusIcon');
-  
+
   statusText.innerHTML = message;
   statusIcon.innerHTML = iconSvg;
-  
+
   status.classList.remove('success', 'error');
   status.classList.add(type);
   status.classList.add('show');
@@ -651,7 +570,7 @@ function showSearchStatus(message, type) {
   const status = document.getElementById('searchStatus');
   const statusText = document.getElementById('searchStatusText');
   const statusIcon = document.getElementById('searchStatusIcon');
-  
+
   let iconSvg;
   if (type === 'success') {
     iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
@@ -660,10 +579,10 @@ function showSearchStatus(message, type) {
   } else {
     iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" x2="9" y1="9" y2="15"></line><line x1="9" x2="15" y1="9" y2="15"></line></svg>`;
   }
-  
+
   statusText.textContent = message;
   statusIcon.innerHTML = iconSvg;
-  
+
   status.classList.remove('success', 'error', 'info');
   status.classList.add(type);
   status.classList.add('show');
@@ -702,7 +621,6 @@ function setupNavigation() {
   const navLinks = {
     'tokenNav': 'token',
     'extractNav': 'extract',
-    'searchNav': 'search',
     'jobappNav': 'jobapp'
   };
 
@@ -713,7 +631,7 @@ function setupNavigation() {
       link.addEventListener('click', (e) => {
         e.preventDefault();
         navigateTo(page);
-        
+
         // Update current tab URL when navigating to job app page
         if (page === 'jobapp') {
           setupJobApplicationPage();
@@ -726,8 +644,10 @@ function setupNavigation() {
   window.addEventListener('hashchange', handleHashNavigation);
 }
 
+
+
 function handleHashNavigation() {
-  const hash = window.location.hash.slice(1) || 'search';
+  const hash = window.location.hash.slice(1) || 'jobapp';
   navigateTo(hash);
 }
 
@@ -745,7 +665,7 @@ function navigateTo(pageName) {
   });
 
   // Show appropriate page
-  const pages = ['tokenPage', 'extractPage', 'searchPage', 'jobappPage'];
+  const pages = ['tokenPage', 'extractPage', 'jobappPage'];
   pages.forEach(pageId => {
     const page = document.getElementById(pageId);
     if (page) {
@@ -756,7 +676,7 @@ function navigateTo(pageName) {
       }
     }
   });
-  
+
   // Update current tab URL when navigating to job app page
   if (pageName === 'jobapp') {
     updateJobApplicationURL();
@@ -793,11 +713,12 @@ function handleTabActivated(activeInfo) {
 
   // To get more details about the newly active tab (like its URL or title),
   // you need to use chrome.tabs.get()
-  chrome.tabs.get(activeInfo.tabId, function(tab) {
+  chrome.tabs.get(activeInfo.tabId, function (tab) {
     if (chrome.runtime.lastError) {
-      console.error(chrome.runtime.lastError);
       return;
     }
+    // Update compatibility when tab changes
+    checkPageCompatibility();
     if (tab && tab.url && jobLinkInput) {
       jobLinkInput.value = tab.url;
     }
@@ -826,7 +747,104 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       // only update when the changed tab is the active one
       if (active && active.id === tabId && jobLinkInput) {
         jobLinkInput.value = active.url || '';
+        checkPageCompatibility();
       }
-    }).catch(() => {});
+    }).catch(() => { });
   }
 });
+
+// UI and Compatibility Helpers
+function updateAuthUI(isAuthenticated) {
+  const extractBtn = document.getElementById('extractBtn');
+  const globalLoginBtn = document.getElementById('globalLoginBtn');
+  const changeTokenBtn = document.getElementById('changeTokenBtn');
+
+  // FAB Elements
+  const fabContainer = document.getElementById('fabContainer');
+  const fabAnalyzeBtn = document.getElementById('fabAnalyzeBtn');
+  const fabImproveBtn = document.getElementById('fabImproveBtn');
+  const fabLoginBtn = document.getElementById('fabLoginBtn');
+
+  if (fabContainer) {
+    fabContainer.style.display = 'flex';
+  }
+
+  if (isAuthenticated) {
+    if (extractBtn) extractBtn.style.display = 'flex';
+    if (globalLoginBtn) globalLoginBtn.style.display = 'none';
+    if (changeTokenBtn) changeTokenBtn.style.display = 'block';
+
+    // FAB authenticated state
+    if (fabAnalyzeBtn) fabAnalyzeBtn.style.display = 'flex';
+    if (fabImproveBtn) fabImproveBtn.style.display = 'flex';
+    if (fabLoginBtn) fabLoginBtn.style.display = 'none'; // Hide singular login button
+
+    // Check page compatibility since we are authenticated
+    checkPageCompatibility();
+  } else {
+    // Hide buttons if no token
+    if (extractBtn) extractBtn.style.display = 'none';
+    if (globalLoginBtn) globalLoginBtn.style.display = 'flex';
+    if (changeTokenBtn) changeTokenBtn.style.display = 'none';
+
+    // FAB unauthenticated state
+    if (fabAnalyzeBtn) fabAnalyzeBtn.style.display = 'none';
+    if (fabImproveBtn) fabImproveBtn.style.display = 'none';
+    if (fabLoginBtn) fabLoginBtn.style.display = 'flex';
+  }
+}
+
+async function checkPageCompatibility() {
+  if (!validatedToken) return;
+  const extractBtn = document.getElementById('extractBtn');
+  if (!extractBtn) return;
+
+  // Default to disabled
+  extractBtn.disabled = true;
+  extractBtn.style.opacity = '0.5';
+  extractBtn.style.cursor = 'not-allowed';
+
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab || !tab.url) return;
+
+  // Check URL
+  if (tab.url.includes('linkedin.com/in/')) {
+    // Check Content
+    const hasKeywords = await checkKeywordsInPage(tab.id);
+    if (hasKeywords) {
+      extractBtn.disabled = false;
+      extractBtn.style.opacity = '1';
+      extractBtn.style.cursor = 'pointer';
+      extractBtn.title = "Download LinkedIn Profile";
+    } else {
+      extractBtn.title = "Profile keywords 'experience' or 'education' not found";
+    }
+  } else {
+    extractBtn.title = "Navigate to a valid LinkedIn profile page";
+  }
+}
+
+function checkKeywordsInPage(tabId) {
+  return new Promise(resolve => {
+    if (!chrome.scripting) {
+      console.warn("chrome.scripting API not available");
+      resolve(false);
+      return;
+    }
+    chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      func: () => {
+        const text = document.body.innerText.toLowerCase();
+        return (text.includes('experience') || text.includes('education'));
+      }
+    }, (results) => {
+      if (chrome.runtime.lastError) {
+        resolve(false);
+      } else if (!results || !results[0]) {
+        resolve(false);
+      } else {
+        resolve(results[0].result);
+      }
+    });
+  });
+}

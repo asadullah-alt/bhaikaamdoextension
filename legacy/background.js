@@ -1,7 +1,114 @@
 // Background service worker to navigate tabs and extract <main> HTML from details pages
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener(async () => {
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+  await checkAndValidateCookie();
 });
+
+// Watch for cookie changes to keep storage in sync
+chrome.cookies.onChanged.addListener((changeInfo) => {
+  const domain = changeInfo.cookie.domain;
+  if (domain.includes('bhaikaamdo.com')) {
+    if (changeInfo.cookie.name === 'cf_auth') {
+      // Re-run full validation if auth cookie changes
+      checkAndValidateCookie();
+    } else if (changeInfo.cookie.name === 'bhaikaamdo_defaultresume') {
+      // Sync default resume directly
+      if (!changeInfo.removed && changeInfo.cookie.value) {
+        chrome.storage.local.set({ defaultResume: changeInfo.cookie.value });
+      } else {
+        chrome.storage.local.remove('defaultResume');
+      }
+    }
+  }
+});
+
+async function checkAndValidateCookie() {
+  try {
+    // 1. Check Auth Cookie
+    const cookie = await chrome.cookies.get({
+      url: 'https://bhaikaamdo.com',
+      name: 'cf_auth'
+    });
+
+    if (cookie && cookie.value) {
+      // Validate the token
+      const validationResult = await validateToken(cookie.value);
+
+      if (validationResult.success && validationResult.valid) {
+        // Store token in chrome.storage.local
+        await chrome.storage.local.set({
+          careerforgeToken: cookie.value,
+          username: validationResult.username
+        });
+      } else {
+        // Invalid token
+        await chrome.storage.local.remove(['careerforgeToken', 'username']);
+        chrome.tabs.create({ url: 'https://bhaikaamdo.com/signup' });
+      }
+    } else {
+      // No cookie found
+      await chrome.storage.local.remove(['careerforgeToken', 'username']);
+      chrome.tabs.create({ url: 'https://bhaikaamdo.com/signup' });
+    }
+
+    // 2. Check Default Resume Cookie
+    try {
+      const resumeCookie = await chrome.cookies.get({
+        url: 'https://bhaikaamdo.com',
+        name: 'bhaikaamdo_defaultresume'
+      });
+
+      if (resumeCookie && resumeCookie.value) {
+        await chrome.storage.local.set({ defaultResume: resumeCookie.value });
+      } else {
+        await chrome.storage.local.remove(['defaultResume']);
+      }
+    } catch (resumeError) {
+      console.warn('Error checking default resume cookie:', resumeError);
+    }
+
+  } catch (error) {
+    console.error('Error checking cookie:', error);
+    // On error, treat as invalid
+    chrome.tabs.create({ url: 'https://bhaikaamdo.com/signup' });
+  }
+}
+
+async function validateToken(token) {
+  try {
+    const response = await fetch('https://careerback.bhaikaamdo.com/api/checkExtensionToken', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({ token })
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success && data.valid) {
+      return {
+        success: true,
+        valid: true,
+        username: data.username || ''
+      };
+    } else {
+      return {
+        success: false,
+        valid: false,
+        username: ''
+      };
+    }
+  } catch (error) {
+    console.error('Error validating token:', error);
+    return {
+      success: false,
+      valid: false,
+      username: ''
+    };
+  }
+}
 
 function removeClassesAndStyles(element) {
   if (!element) {
@@ -23,7 +130,7 @@ function removeClassesAndStyles(element) {
   });
 
   console.log(`Removed classes and styles from ${allElements.length + 1} elements`);
-  
+
   // Return the modified element
   return element;
 }
@@ -53,16 +160,16 @@ function waitForTabComplete(tabId, timeout = 25000) {
 function extractLinkedInExperience(mainElement) {
   // Find all list items in the experience section using stable selectors
   const experienceItems = mainElement.querySelectorAll('li.pvs-list__paged-list-item');
-  
+
   const experiences = [];
-  
+
   experienceItems.forEach((item) => {
     const experience = {};
-    
+
     // Extract job title
     const titleElement = item.querySelector('.t-bold span[aria-hidden="true"]');
     experience.title = titleElement ? titleElement.textContent.trim() : '';
-    
+
     // Extract company name and employment type
     const companyElement = item.querySelector('.t-14.t-normal span[aria-hidden="true"]');
     if (companyElement) {
@@ -71,37 +178,37 @@ function extractLinkedInExperience(mainElement) {
       experience.company = parts[0] || '';
       experience.employmentType = parts[1] || '';
     }
-    
+
     // Extract duration
     const durationElement = item.querySelector('.pvs-entity__caption-wrapper[aria-hidden="true"]');
     experience.duration = durationElement ? durationElement.textContent.trim() : '';
-    
+
     // Extract location
     const locationElements = item.querySelectorAll('.t-14.t-normal.t-black--light span[aria-hidden="true"]');
     if (locationElements.length > 1) {
       experience.location = locationElements[1].textContent.trim();
     }
-    
+
     // Extract description/responsibilities
     const descriptionElement = item.querySelector('.t-14.t-normal.t-black span[aria-hidden="true"]');
     experience.description = descriptionElement ? descriptionElement.textContent.trim() : '';
-    
+
     // Extract company logo URL
     const logoImg = item.querySelector('img.ivm-view-attr__img--centered');
     experience.companyLogoUrl = logoImg ? logoImg.src : '';
-    
+
     // Extract company URL
     const companyLink = item.querySelector('a[href*="/company/"]');
     experience.companyUrl = companyLink ? companyLink.href : '';
-    
+
     experiences.push(experience);
   });
-  
+
   return experiences;
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  
+
 
   // New handler: fetch multiple details pages SEQUENTIALLY (one at a time)
   if (message && message.action === 'fetchMultipleDetails') {
@@ -120,56 +227,56 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           try {
             // Wait 15 seconds for the page to fully load
             await waitForTabComplete(tabId, 15000);
-            
+
             const results = await chrome.scripting.executeScript({
               target: { tabId },
               func: (timeoutMs, pathURL) => {
-                 return new Promise((resolve) => {
-              const start = Date.now();
-              function check() {
-            
-                   const main = document.querySelector('main');
-                   
-                   resolve(main ? main.innerHTML : null);
-                  return;
-                
-                setTimeout(check, 15000);
-              }
-              check();
-            });
+                return new Promise((resolve) => {
+                  const start = Date.now();
+                  function check() {
+
+                    const main = document.querySelector('main');
+
+                    resolve(main ? main.innerHTML : null);
+                    return;
+
+                    setTimeout(check, 15000);
+                  }
+                  check();
+                });
               },
               args: [15000, p]
             });
-            
+
             const html = (results && results[0] && results[0].result) ? results[0].result : null;
             return { success: true, html };
           } catch (e) {
             return { success: false, message: e.message || String(e) };
           } finally {
-            try { 
-              await chrome.tabs.remove(tabId); 
-            } catch (e) { 
-              /* ignore */ 
+            try {
+              await chrome.tabs.remove(tabId);
+            } catch (e) {
+              /* ignore */
             }
           }
         };
 
         // Process each path SEQUENTIALLY instead of in parallel
         const out = {};
-        
+
         for (const p of paths) {
           const url = `${base}/details/${p}/`;
-          
+
           try {
             const result = await extractInHiddenTab(url, p);
             out[p] = result;
           } catch (error) {
-            out[p] = { 
-              success: false, 
-              message: error.message || String(error) 
+            out[p] = {
+              success: false,
+              message: error.message || String(error)
             };
           }
-          
+
           // Optional: Add a small delay between tabs to be extra safe
           await new Promise(resolve => setTimeout(resolve, 1000));
         }

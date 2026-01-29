@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Bhaikaamdo - streamline your entire job search journey",
+  "version": "1.0",
+  "description": "Powerful AI-driven tools that work together to streamline your entire job search journey",
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "scripting",
+    "storage",
+    "cookies",
+    "sidePanel"
+  ],
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "sharedUI.js",
+        "saveJob.js",
+        "analyzeResume.js",
+        "improveResume.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
